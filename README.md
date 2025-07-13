@@ -1,4 +1,4 @@
-# 🚀 Node.js CI/CD Pipeline Project with Docker, Jenkins, and EJS 🌐
+# 🚀 Node.js TO_DO_app-Project with Docker, Jenkins, and EJS 🌐
 
 This project demonstrates a full-stack **Node.js application** equipped with a **complete CI/CD pipeline**, powered by **Docker**, **Jenkins**, and **GitHub**. The app uses **EJS templating**, integrates with **Docker Compose**, and is built to scale with ease.
 
