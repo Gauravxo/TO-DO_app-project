@@ -1,0 +1,33 @@
+name: Weekly Dependency Update
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - run: npm audit fix || true
+
+      - run: npm update || true
+
+      - name: Commit Changes
+        run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+
+          git add .
+          git commit -m "🔐 Auto dependency updates" || echo "No changes"
+
+          git push
