@@ -16,7 +16,7 @@
   "description": "Basic to do list exercise",
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^10.2.0",
+    "mocha": "^11.7.6",
     "nyc": "^14.1.1",
     "supertest": "^4.0.2"
   }
