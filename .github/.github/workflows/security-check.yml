@@ -1,0 +1,67 @@
+name: Full Security Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'   # weekly full scan
+
+permissions:
+  contents: read
+  security-events: write   # for CodeQL & Trivy results
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------- Dependency scanning ----------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit (non-blocking for low severity)
+        run: npm audit --audit-level=high || true
+        # Set --audit-level=high to fail on high/critical vulnerabilities
+        # Remove || true if you want the workflow to fail on any high/critical issue
+
+      # ---------- OSV scanner (more accurate than npm audit) ----------
+      - name: Run OSV scanner
+        uses: google/osv-scanner-action@v1.7.2
+        with:
+          scan-args: |-
+            --format=table
+            ./package-lock.json
+
+      # ---------- CodeQL (static analysis) ----------
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      # ---------- Trivy (filesystem scan for secrets, IaC, configs) ----------
+      - name: Run Trivy scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
